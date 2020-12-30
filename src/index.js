@@ -12,11 +12,12 @@ const optionDefs = [
 const options = args(optionDefs)
 console.log(options)
 
-// const dbInit = require('@d/db-initializer')
+const accountReader = require('@/account-reader')
 
 switch (options.target) {
   case 'hello':
     console.log('hello world')
+    accountReader.get()
     break
   default:
     throw new Error('unexpected target.')

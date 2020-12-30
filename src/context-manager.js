@@ -5,9 +5,9 @@
  */
 module.exports = {
   /**
-   * @description 設定ファイル配置ディレクトリ
+   * @description 設定ファイルパス
    */
-  ConfigDir: 'resources/configs',
+  ConfigFilePath: 'resources/configs/index.yml',
   /**
    * @description 設定情報
    */
@@ -20,6 +20,16 @@ module.exports = {
    * ストリーミング用コンテキスト
    */
   streamingContext: null,
+  /**
+   * @description 設定情報を取得します。
+   * @returns {Object} 設定情報
+   */
+  getConfig () {
+    if (!module.exports.config) {
+      module.exports._initConfig()
+    }
+    return module.exports.config
+  },
   /**
    * @description コンテキストを取得します。
    * @returns {Object} コンテキスト
@@ -49,7 +59,7 @@ module.exports = {
     const yaml = require('js-yaml')
     module.exports.config = yaml.safeLoad(
       fs.readFileSync(
-        module.exports.ConfigDir,
+        module.exports.ConfigFilePath,
         'utf8'
       )
     )
@@ -70,11 +80,13 @@ module.exports = {
       module.exports.config.ssl,
       'oanda context'
     )
+    module.exports.context.setToken(module.exports.config.token)
     module.exports.streamingContext = new Context(
       module.exports.config.streamingHostname,
       module.exports.config.port,
       module.exports.config.ssl,
       'oanda streaming context'
     )
+    module.exports.streamingContext.setToken(module.exports.config.token)
   }
 }
