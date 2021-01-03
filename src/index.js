@@ -12,12 +12,41 @@ const optionDefs = [
 const options = args(optionDefs)
 console.log(options)
 
-const accountReader = require('@/account-reader')
+// const accountReader = require('@/account-reader')
+// const instrumnetReader = require('@/instrument-reader')
+const analyzer = require('@a/candle-slope-analyzer')
 
 switch (options.target) {
   case 'hello':
     console.log('hello world')
-    accountReader.get()
+    // accountReader.get()
+    // instrumnetReader.getCandles()
+    // instrumnetReader.getOrderBook()
+    break
+  case 'predicate':
+    (async () => {
+      try {
+        await analyzer.predicate({
+        })
+      } catch (e) {
+        console.log(e)
+      } finally {
+        process.exit()
+      }
+    })()
+    break
+  case 'learn':
+    (async () => {
+      try {
+        await analyzer.learn({
+        })
+        // analyzer.testLearnSpan()
+      } catch (e) {
+        console.log(e)
+      } finally {
+        process.exit()
+      }
+    })()
     break
   default:
     throw new Error('unexpected target.')

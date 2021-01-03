@@ -15,6 +15,7 @@ module.exports = {
     context.account.get(
       config.activeAccount,
       response => {
+        require('@h/rest-helper').handleErrorResponse(response)
         const { account } = response.body
         console.log(account.toString())
       }

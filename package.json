@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "hello": "node ./src/index.js -t hello"
+    "hello": "node ./src/index.js -t hello",
+    "predicate": "node ./src/index.js -t predicate",
+    "learn": "node ./src/index.js -t learn"
   },
   "repository": {
     "type": "git",
@@ -22,8 +24,11 @@
     "@oanda/v20": "^3.0.25-0",
     "command-line-args": "^5.1.1",
     "js-yaml": "^3.14.1",
+    "lodash": "^4.17.20",
     "module-alias": "^2.2.2",
-    "node-dev": "^6.2.0"
+    "moment": "^2.29.1",
+    "node-dev": "^6.2.0",
+    "thread-sleep": "^2.2.0"
   },
   "devDependencies": {
     "eslint": "^7.16.0",
@@ -35,6 +40,8 @@
   },
   "_moduleAliases": {
     "@": "src",
-    "@h": "src/helpers"
+    "@a": "src/analytics",
+    "@h": "src/helpers",
+    "@r": "src/readers"
   }
 }
