@@ -23,6 +23,7 @@
   "homepage": "https://github.com/tknemuru/maurice#readme",
   "dependencies": {
     "@elastic/elasticsearch": "^7.10.0",
+    "@jupyterlab/services": "^6.0.2",
     "@oanda/v20": "^3.0.25-0",
     "command-line-args": "^5.1.1",
     "js-yaml": "^3.14.1",
@@ -30,7 +31,9 @@
     "module-alias": "^2.2.2",
     "moment": "^2.29.1",
     "node-dev": "^6.2.0",
-    "thread-sleep": "^2.2.0"
+    "thread-sleep": "^2.2.0",
+    "ws": "^7.4.2",
+    "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
     "eslint": "^7.16.0",

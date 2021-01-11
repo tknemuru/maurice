@@ -14,10 +14,20 @@ console.log(options)
 
 const accumulater = require('@acm/candle-accumulater')
 const analyzer = require('@a/candle-slope-analyzer')
+const jupyter = require('@acs/jupyter-accessor')
 
 switch (options.target) {
   case 'hello':
-    console.log('hello world')
+    // console.log('hello world')
+    (async () => {
+      try {
+        await jupyter.execute()
+      } catch (e) {
+        console.log(e)
+      } finally {
+        // process.exit()
+      }
+    })()
     break
   case 'accumulate':
     (async () => {
