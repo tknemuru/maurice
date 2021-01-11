@@ -14,6 +14,7 @@ console.log(options)
 
 // const accountReader = require('@/account-reader')
 // const instrumnetReader = require('@/instrument-reader')
+const accumulater = require('@acm/candle-accumulater')
 const analyzer = require('@a/candle-slope-analyzer')
 
 switch (options.target) {
@@ -22,6 +23,18 @@ switch (options.target) {
     // accountReader.get()
     // instrumnetReader.getCandles()
     // instrumnetReader.getOrderBook()
+    break
+  case 'accumulate':
+    (async () => {
+      try {
+        await accumulater.accumulate({
+        })
+      } catch (e) {
+        console.log(e)
+      } finally {
+        process.exit()
+      }
+    })()
     break
   case 'predicate':
     (async () => {

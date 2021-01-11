@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "hello": "node ./src/index.js -t hello",
+    "accumulate": "node ./src/index.js -t accumulate",
     "predicate": "node ./src/index.js -t predicate",
     "learn": "node ./src/index.js -t learn"
   },
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/tknemuru/maurice#readme",
   "dependencies": {
+    "@elastic/elasticsearch": "^7.10.0",
     "@oanda/v20": "^3.0.25-0",
     "command-line-args": "^5.1.1",
     "js-yaml": "^3.14.1",
@@ -41,6 +43,8 @@
   "_moduleAliases": {
     "@": "src",
     "@a": "src/analytics",
+    "@acm": "src/accumulaters",
+    "@acs": "src/accessors",
     "@h": "src/helpers",
     "@r": "src/readers"
   }

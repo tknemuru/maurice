@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "granularity": {
+      "type": "keyword"
+    },
+    "instrument": {
+      "type": "keyword"
+    },
+    "time": {
+      "type": "date"
+      
+    },
+    "bid": {
+      "properties": {
+        "o": {
+          "type": "float"
+        },
+        "h": {
+          "type": "float"
+        },
+        "l": {
+          "type": "float"
+        },
+        "c": {
+          "type": "float"
+        }
+      }
+    },
+    "ask": {
+      "properties": {
+        "o": {
+          "type": "float"
+        },
+        "h": {
+          "type": "float"
+        },
+        "l": {
+          "type": "float"
+        },
+        "c": {
+          "type": "float"
+        }
+      }
+    },
+    "mid": {
+      "properties": {
+        "o": {
+          "type": "float"
+        },
+        "h": {
+          "type": "float"
+        },
+        "l": {
+          "type": "float"
+        },
+        "c": {
+          "type": "float"
+        }
+      }
+    },
+    "volume": {
+      "type": "integer"
+    }
+  }
+}
