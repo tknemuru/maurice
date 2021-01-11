@@ -1,6 +1,6 @@
 'use strict'
 
-// const context = require('@/context-manager')
+const context = require('@/context-manager')
 const fs = require('fs')
 const services = require('@jupyterlab/services')
 let _client
@@ -30,21 +30,10 @@ module.exports = {
         console.log('onIOPub')
         console.log(reply)
       }
-      // console.log(future.done)
       await future.done
         .catch(e => {
           console.log(e)
         })
-      // console.log(ret)
-      // const future = await client.execute({
-      //   code: "print('hello world')"
-      // })
-      // future.onDone = () => {
-      //   console.log('Future is fulfilled')
-      // }
-      // future.onIOPub = (msg) => {
-      //   console.log(msg.content)
-      // }
     } catch (e) {
       console.error(e)
     } finally {
@@ -69,15 +58,16 @@ async function getClient () {
  * @returns {void}
  */
 async function initClient () {
+  const param = getParam()
   const options = {
-    path: 'dev/tknemuru/maurice-learning/hoge-world.ipynb',
+    path: param.path,
     type: 'notebook',
-    name: 'hoge-world.ipynb',
+    name: param.name,
     kernel: {
       name: 'python'
     },
-    baseUrl: 'http://localhost:8888',
-    token: '1c99a1076e094f3643398952ccbab1e2b877e6ad9eaed679'
+    baseUrl: param.baseUrl,
+    token: param.token
   }
   const serverSettings = services.ServerConnection.makeSettings(options)
   console.log(serverSettings)
@@ -87,26 +77,12 @@ async function initClient () {
     serverSettings
   })
   _client = await sessionManager.startNew(options)
-  // global.XMLHttpRequest = XMLHttpRequest
-  // global.WebSocket = WebSocket
-  // const Kernel = {}
-  // console.log(jupyter)
-  // const ajaxSettings = {
-  //   requestHeaders: {
-  //     Authorization: 'token 807a6ae09df832ace1e268ff1cb603032ea3556f4244f690'
-  //   }
-  // }
-  // const kernelSpecs = await Kernel.getSpecs({
-  //   baseUrl: 'http://localhost:8888',
-  //   ajaxSettings
-  // })
-  // console.log('Default spec:', kernelSpecs.default)
-  // console.log('Available specs', Object.keys(kernelSpecs.kernelspecs))
-  // const options = {
-  //   baseUrl: 'http://localhost:8888',
-  //   name: kernelSpecs.default,
-  //   ajaxSettings,
-  //   clientId: '807a6ae09df832ace1e268ff1cb603032ea3556f4244f690'
-  // }
-  // _client = await Kernel.startNew(options)
+}
+
+/**
+ * @description パラメータを取得します。
+ * @returns {Object} パラメータ
+ */
+function getParam () {
+  return context.getConfig().jupyter
 }
