@@ -1,9 +1,26 @@
 'use strict'
 
 /**
- * @description instrumentの読み取り機能を提供します。
+ * @description OandaAPIへの接続機能を提供します。
  */
 module.exports = {
+  /**
+   * @description アカウント情報を取得します。
+   * @returns {Object} アカウント情報
+   */
+  getAccount () {
+    const manager = require('@/context-manager')
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    context.account.get(
+      config.activeAccount,
+      response => {
+        require('@h/rest-helper').handleErrorResponse(response)
+        const { account } = response.body
+        console.log(account.toString())
+      }
+    )
+  },
   /**
    * @description ローソク情報を取得します。
    * @param {String} instrument 銘柄

@@ -2,8 +2,9 @@
 
 const context = require('@/context-manager')
 const es = require('@acs/elasticsearch-accessor')
-// const jsonHelper = require('@h/json-helper')
-// const moment = require('moment')
+const oanda = require('@acs/oanda-accessor')
+const moment = require('moment')
+const sleep = require('thread-sleep')
 
 /**
  * @description ローソク足の蓄積機能を提供します。
@@ -17,26 +18,40 @@ module.exports = {
     // パラメータを取得
     const param = getParam()
 
-    const moment = require('moment')
-    const from = moment().subtract(param.from, 'M').format()
-    console.log(from)
-    // ローソク足を取得
-    const reader = require('@r/instrument-reader')
-    const res = await reader.getCandles(
-      param.instrument,
-      {
-        price: param.price,
-        granularity: param.granularity
-      }
-    )
-    // ESのインデックスデータを作成
-    const indexs = map(res, param)
-    // ESに登録
-    const result = await es.bulkUpsert('candle', indexs)
-    console.log(result)
+    const test = false
+    let i = 0
+    let from = moment().subtract(param.from, 'M').format()
     // eslint-disable-next-line no-unmodified-loop-condition
-    // while (diff > 0 && (!test || i < 1)) {
-    // }
+    while (!test || i < 3) {
+      console.log(`get from ${from}`)
+      // ローソク足を取得
+      const req = {
+        price: param.price,
+        granularity: param.granularity,
+        from,
+        count: param.count
+      }
+      const res = await oanda.getCandles(
+        param.instrument,
+        req
+      )
+      // ESのインデックスデータを作成
+      const indexs = map(res, param)
+      // ESに登録
+      const result = await es.bulkUpsert('candle', indexs)
+      console.log(`total: ${result.total}, suucessful: ${result.successful}`)
+      // 取得開始日時を更新
+      from = getFromDatetime(indexs)
+      i++
+      // 結果が取得予定件数より少なければ処理終了
+      if (!Array.isArray(res.candles) || res.candles.length < param.count) {
+        break
+      }
+      console.log('start sleep...')
+      sleep(param.sleep)
+      console.log('end sleep')
+    }
+    console.log('finish accumulate')
   }
 }
 /**
@@ -99,4 +114,14 @@ function map (response, param) {
  */
 function generateId (row, param) {
   return `${param.instrument}-${param.granularity}-${row.time.replace(/:/g, '-').replace(/\./g, '-')}`.toLowerCase()
+}
+
+/**
+ * @description 開始日時を取得します。
+ * @param {Object} param パラメータ
+ * @returns {String} 開始日時
+ */
+function getFromDatetime (indexs) {
+  const last = indexs.slice(-1)[0]
+  return moment(last.time).format()
 }

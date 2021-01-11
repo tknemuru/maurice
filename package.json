@@ -45,7 +45,6 @@
     "@a": "src/analytics",
     "@acm": "src/accumulaters",
     "@acs": "src/accessors",
-    "@h": "src/helpers",
-    "@r": "src/readers"
+    "@h": "src/helpers"
   }
 }
