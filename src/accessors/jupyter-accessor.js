@@ -1,8 +1,7 @@
 'use strict'
 
 // const context = require('@/context-manager')
-const { XMLHttpRequest } = require('xmlhttprequest')
-const WebSocket = require('ws')
+const fs = require('fs')
 const services = require('@jupyterlab/services')
 let _client
 
@@ -17,14 +16,26 @@ module.exports = {
    * @returns {Array} 実行結果
    */
   async execute () {
+    const client = await getClient()
     try {
-      const client = await getClient()
-      const future = client.kernel.requestExecute({ code: "print('hello world')" })
+      const code = fs.readFileSync('resources/jupyters/pred.py', { encoding: 'utf-8' })
+      // const code = "print('hello world')"
+      console.log(code)
+      const future = client.kernel.requestExecute({ code })
       future.onReply = reply => {
         console.log('Got execute reply')
+        // console.log(reply)
+      }
+      future.onIOPub = reply => {
+        console.log('onIOPub')
         console.log(reply)
       }
-      return future.done
+      // console.log(future.done)
+      await future.done
+        .catch(e => {
+          console.log(e)
+        })
+      // console.log(ret)
       // const future = await client.execute({
       //   code: "print('hello world')"
       // })
@@ -36,6 +47,8 @@ module.exports = {
       // }
     } catch (e) {
       console.error(e)
+    } finally {
+      client.kernel.shutdown()
     }
   }
 }
@@ -57,14 +70,14 @@ async function getClient () {
  */
 async function initClient () {
   const options = {
-    path: 'dev/tknemuru/maurice-learning/hello-world.ipynb',
+    path: 'dev/tknemuru/maurice-learning/hoge-world.ipynb',
     type: 'notebook',
-    name: 'hello-world.ipynb',
+    name: 'hoge-world.ipynb',
     kernel: {
       name: 'python'
     },
     baseUrl: 'http://localhost:8888',
-    token: '807a6ae09df832ace1e268ff1cb603032ea3556f4244f690'
+    token: '1c99a1076e094f3643398952ccbab1e2b877e6ad9eaed679'
   }
   const serverSettings = services.ServerConnection.makeSettings(options)
   console.log(serverSettings)
