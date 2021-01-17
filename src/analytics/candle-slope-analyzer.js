@@ -3,6 +3,7 @@
 const context = require('@/context-manager')
 const es = require('@acs/elasticsearch-accessor')
 const json = require('@h/json-helper')
+const sleep = require('thread-sleep')
 
 /**
  * @description ローソク足の傾き分析機能を提供します。
@@ -56,9 +57,10 @@ module.exports = {
     let inputs = []
     let answers = []
     let i = 0
+    let validColLength = -1
     const test = false
     // eslint-disable-next-line no-unmodified-loop-condition
-    while (diff > 0 && (!test || i < 3)) {
+    while (diff > 0 && (!test || i < 30)) {
       console.log(from)
       console.log(to)
       // 学習用ローソク足を取得
@@ -75,13 +77,16 @@ module.exports = {
         'candle',
         {
           body,
-          sort: 'time:asc'
+          sort: 'time:asc',
+          size: param.learnings.inputSize
         }
       )
       const insCandles = result.body.hits.hits.map(h => h._source)
-      inputs.push(map(insCandles, param))
+      const input = map(insCandles, param)
+      inputs.push(input)
       if (i === 0) {
-        console.log(`input length is ${inputs[0].length}`)
+        validColLength = inputs[0].length
+        console.log(`input length is ${validColLength}`)
       }
       // 教師用ローソク足を取得
       body = json.readEsQuery(
@@ -89,7 +94,7 @@ module.exports = {
         {
           granularity: param.granularity,
           instrument: param.instrument,
-          from,
+          from: to,
           to: ansTo
         }
       )
@@ -97,12 +102,19 @@ module.exports = {
         'candle',
         {
           body,
-          sort: 'time:asc'
+          sort: 'time:asc',
+          size: param.learnings.answerSize
         }
       )
       const ansCandles = result.body.hits.hits.map(h => h._source)
+      if (i === 0) {
+        console.log(`answer size is ${ansCandles.length}`)
+      }
       const answer = map(ansCandles, param)[ansCandles.length - 2]
-      answers.push([answer])
+      if (isValidInput(input, validColLength)) {
+        console.log('OK')
+        answers.push([answer])
+      }
       from = moment(from).add(slideRange, 'm').format()
       to = moment(from).add(param.from, 'm').format()
       ansTo = moment(to).add(param.learnings.answer, 'h').format()
@@ -112,16 +124,14 @@ module.exports = {
       if (i % param.learnings.writingUnit === 0) {
         console.log(`${i} now writing...`)
         // データを書き込む
-        write(inputs, 'input')
-        write(answers, 'answer')
+        writeAll(inputs, answers, validColLength)
         inputs = []
         answers = []
       }
     }
     if (inputs.length > 0) {
       // データを書き込む
-      write(inputs, 'input')
-      write(answers, 'answer')
+      writeAll(inputs, answers, validColLength)
     }
   }
 }
@@ -159,13 +169,13 @@ function map (list, param) {
   const rawDatas = list.map(l => l[target][param.usingData])
   const length = rawDatas.length
 
-  // 傾きに変換
+  // 傾きに変換して桁を変える
   const slopes = rawDatas
     .map((r, i, ar) => {
       if (length - 1 <= i) {
         return -999
       }
-      return ar[i + 1] - r
+      return Math.floor((ar[i + 1] - r) * param.learnings.roundRate)
     })
     .filter((r, i) => i < length - 1)
   return slopes
@@ -184,6 +194,51 @@ function write (data, prefix) {
     , dataCsv
     , { encoding: 'utf-8' }
   )
+}
+
+/**
+ * @description データの書き込みを行います。
+ * @param {Array} inputs - 入力データ
+ * @param {Array} answers - 教師データ
+ * @param {Number} validColLength - 正しい入力データのカラム数
+ * @returns {void}
+ */
+function writeAll (inputs, answers, validColLength) {
+  const rowLen = inputs.length
+  if (inputs.length <= 0) {
+    return
+  }
+  let valid = true
+  const _inputs = inputs.filter((inp, i) => {
+    if (isValidInput(inp, validColLength)) {
+      return true
+    }
+    if (i < rowLen - 1) {
+      valid = false
+      console.warn(`invalid data i:${i} rowLen:${rowLen} inp.length:${inp.length} validColLength:${validColLength}`)
+      sleep(2000)
+    }
+    return false
+  })
+  if (!valid) {
+    return
+  }
+  const inLen = _inputs.length
+  const _answers = answers.filter((ans, i) => i <= inLen - 1)
+  write(_inputs, 'input')
+  write(_answers, 'answer')
+}
+
+/**
+ * @description 入力情報が妥当かどうか
+ */
+function isValidInput (input, validColLength) {
+  if (input.length === validColLength) {
+    return true
+  } else {
+    console.warn(`invalid length input.length:${input.length} validColLength:${validColLength}`)
+    return false
+  }
 }
 
 /**

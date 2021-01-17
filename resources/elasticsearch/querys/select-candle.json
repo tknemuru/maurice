@@ -19,8 +19,7 @@
         {
           "range": {
             "time": {
-              "gte": "$from",
-              "lte": "$to"
+              "gte": "$from"
             }
           }
         }
