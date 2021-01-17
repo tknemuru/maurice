@@ -1,0 +1,30 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "granularity": {
+              "value": "$granularity"
+            }
+          }
+        },
+        {
+          "term": {
+            "instrument": {
+              "value": "$instrument"
+            }
+          }
+        },
+        {
+          "range": {
+            "time": {
+              "gte": "$from",
+              "lte": "$to"
+            }
+          }
+        }
+      ]
+    } 
+  }
+}

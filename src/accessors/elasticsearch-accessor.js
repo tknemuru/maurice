@@ -9,6 +9,13 @@ let _client
  */
 module.exports = {
   /**
+   * @description Elasticsearchクライアントを取得します。
+   * @returns Elasticsearchクライアント
+   */
+  getClient () {
+    return _getClient()
+  },
+  /**
    * @description 検索を実行します。
    * @param {String} index - インデックス名
    * @param {Object} param - パラメータ
@@ -16,7 +23,8 @@ module.exports = {
    */
   async search (index, param) {
     let _param = {
-      index
+      index,
+      size: getParam().maxSearchSize
     }
     if (param) {
       _param = Object.assign(
@@ -24,7 +32,7 @@ module.exports = {
         param
       )
     }
-    const client = getClient()
+    const client = _getClient()
     const result = await client.search(_param)
     return result
   },
@@ -35,7 +43,7 @@ module.exports = {
    * @returns {Object} 実行結果
    */
   async bulkUpsert (index, datasource) {
-    const client = getClient()
+    const client = _getClient()
     const result = await client.helpers.bulk({
       datasource,
       onDocument (doc) {
@@ -53,7 +61,7 @@ module.exports = {
  * @description クライアントを取得します。
  * @returns {Object} クライアント
  */
-function getClient () {
+function _getClient () {
   if (!_client) {
     initClient()
   }
@@ -65,6 +73,13 @@ function getClient () {
  * @returns {void}
  */
 function initClient () {
-  const config = context.getConfig()
-  _client = new Client(config.elasticsearch)
+  _client = new Client(getParam())
+}
+
+/**
+ * @description パラメータを取得します。
+ * @returns {Object} パラメータ
+ */
+function getParam () {
+  return context.getConfig().elasticsearch
 }
